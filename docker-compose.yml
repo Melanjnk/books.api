@@ -1,0 +1,39 @@
+version: '3.3'
+
+services:
+  postgres:
+    container_name: books_postgres
+    image: postgres:12.3-alpine
+    volumes:
+      - dbdata:/var/lib/postgresql/data:delegated
+    ports:
+      - "54322:5432"
+    environment:
+      POSTGRES_USER: books
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: books
+
+  nginx:
+    container_name: books_nginx
+    image: nginx:latest
+    ports:
+      - "8090:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/dev/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+#      - ./docker/dev/nginx/sites-enabled/default.conf:/etc/nginx/conf.d/sites-enabled/default.conf:ro
+#      - ./docker/dev/nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - app
+
+  app:
+    container_name: books_app
+    build:
+      context: ./docker/dev/app
+    volumes:
+      - ./:/var/www
+
+
+
+volumes:
+  dbdata:
